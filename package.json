@@ -6,7 +6,7 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/mayahq/maya-red-gsheet"
+    "url": "git@github.com:mayahq/maya-red-gsheet.git"
   },
   "author": "",
   "license": "ISC",
