@@ -36,7 +36,7 @@
     "thumbnail": "https://maya-public-assets.s3.ap-south-1.amazonaws.com/modules/sheets.svg",
     "repository": {
       "type": "git",
-      "url": "git+.git"
+      "url": "git@github.com:mayahq/maya-red-gsheet.git"
     },
     "origin": {
       "moduleId": "6215e351f36d03001b791bc6"
