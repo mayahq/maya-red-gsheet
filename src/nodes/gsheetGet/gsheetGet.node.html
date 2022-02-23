@@ -1,0 +1,152 @@
+<script type='text/javascript'>
+    RED.nodes.registerType("gsheet-get", {
+        category: "Maya Red Gsheet",
+        color: "#8BBDD9",
+        defaults: {
+            name: {
+                value: ""
+            },
+            isProfileConfigNode: {
+                value: false
+            },
+            url: {
+                value: ""
+            },
+            payloadTypeurl: {
+                value: "str"
+            },
+            gridRange: {
+                value: "Sheet1"
+            },
+            payloadTypegridRange: {
+                value: "jsonata"
+            },
+            includeGridData: {
+                value: "true"
+            },
+            payloadTypeincludeGridData: {
+                value: "bool"
+            },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "fa-file-code-o.png",
+        label: function() {
+            return this.name || "gsheet-get"
+        },
+        paletteLabel: "gsheet-get",
+        exportable: true,
+        oneditprepare: function() {
+            if (this.payloadTypeurl === null) {
+                if (this.url === "") {
+                    this.payloadTypeurl = "date"
+                } else {
+                    this.payloadTypeurl = "str"
+                }
+            } else if (this.payloadTypeurl === 'string' || this.payloadTypeurl === 'none') {
+                this.payloadTypeurl = "str"
+            }
+
+            $("#node-input-payloadTypeurl").val(this.payloadTypeurl)
+            $("#node-input-url").typedInput({
+                default: "str",
+                typeField: $("#node-input-payloadTypeurl"),
+                types: ["msg", "flow", "global", "str"]
+            })
+            $("#node-input-url").typedInput("type", this.payloadTypeurl)
+
+            if (this.payloadTypegridRange === null) {
+                if (this.gridRange === "") {
+                    this.payloadTypegridRange = "date"
+                } else {
+                    this.payloadTypegridRange = "jsonata"
+                }
+            } else if (this.payloadTypegridRange === 'string' || this.payloadTypegridRange === 'none') {
+                this.payloadTypegridRange = "jsonata"
+            }
+
+            $("#node-input-payloadTypegridRange").val(this.payloadTypegridRange)
+            $("#node-input-gridRange").typedInput({
+                default: "jsonata",
+                typeField: $("#node-input-payloadTypegridRange"),
+                types: ["msg", "flow", "global", "jsonata"]
+            })
+            $("#node-input-gridRange").typedInput("type", this.payloadTypegridRange)
+
+            if (this.payloadTypeincludeGridData === null) {
+                if (this.includeGridData === "") {
+                    this.payloadTypeincludeGridData = "date"
+                } else {
+                    this.payloadTypeincludeGridData = "bool"
+                }
+            } else if (this.payloadTypeincludeGridData === 'string' || this.payloadTypeincludeGridData === 'none') {
+                this.payloadTypeincludeGridData = "bool"
+            }
+
+            $("#node-input-payloadTypeincludeGridData").val(this.payloadTypeincludeGridData)
+            $("#node-input-includeGridData").typedInput({
+                default: "bool",
+                typeField: $("#node-input-payloadTypeincludeGridData"),
+                types: ["msg", "flow", "global", "bool"]
+            })
+            $("#node-input-includeGridData").typedInput("type", this.payloadTypeincludeGridData)
+
+        },
+        oneditsave: function() {},
+        oneditcancel: function() {},
+        oneditdelete: function() {},
+        oneditresize: function() {},
+        onpaletteadd: function() {},
+        onpaletteremove: function() {}
+    });
+</script>
+
+<script type="text/html" data-template-name="gsheet-get">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" style="width:70%;" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-input-url">url</label>
+        <input type="text" id="node-input-url"></input>
+        <input type="hidden" id="node-input-payloadTypeurl">
+    </div>
+    <div class="form-row">
+        <label for="node-input-gridRange">gridRange</label>
+        <input type="text" id="node-input-gridRange"></input>
+        <input type="hidden" id="node-input-payloadTypegridRange">
+    </div>
+    <div class="form-row">
+        <label for="node-input-includeGridData">includeGridData</label>
+        <input type="text" id="node-input-includeGridData"></input>
+        <input type="hidden" id="node-input-payloadTypeincludeGridData">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="gsheet-get">
+    <h2>Description</h2>
+    <p>Query opens tabs based on criteria like URL, muted status</p>
+
+    <h2>Config</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+
+
+    <h2>Outputs</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+</script>
