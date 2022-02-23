@@ -1,7 +1,7 @@
 <script type='text/javascript'>
     RED.nodes.registerType("gsheet-get", {
-        category: "Maya Red Gsheet",
-        color: "#8BBDD9",
+        category: "Maya Red GSheet",
+        color: "#4cde35",
         defaults: {
             name: {
                 value: ""
@@ -16,10 +16,10 @@
                 value: "str"
             },
             gridRange: {
-                value: "Sheet1"
+                value: "msg.payload"
             },
             payloadTypegridRange: {
-                value: "jsonata"
+                value: "json"
             },
             includeGridData: {
                 value: "true"
@@ -30,7 +30,7 @@
         },
         inputs: 1,
         outputs: 1,
-        icon: "fa-file-code-o.png",
+        icon: "drive.png",
         label: function() {
             return this.name || "gsheet-get"
         },
@@ -59,17 +59,17 @@
                 if (this.gridRange === "") {
                     this.payloadTypegridRange = "date"
                 } else {
-                    this.payloadTypegridRange = "jsonata"
+                    this.payloadTypegridRange = "json"
                 }
             } else if (this.payloadTypegridRange === 'string' || this.payloadTypegridRange === 'none') {
-                this.payloadTypegridRange = "jsonata"
+                this.payloadTypegridRange = "json"
             }
 
             $("#node-input-payloadTypegridRange").val(this.payloadTypegridRange)
             $("#node-input-gridRange").typedInput({
-                default: "jsonata",
+                default: "json",
                 typeField: $("#node-input-payloadTypegridRange"),
-                types: ["msg", "flow", "global", "jsonata"]
+                types: ["msg", "flow", "global", "json"]
             })
             $("#node-input-gridRange").typedInput("type", this.payloadTypegridRange)
 

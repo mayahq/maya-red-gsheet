@@ -16,7 +16,7 @@ class GsheetAppend extends Node {
     static schema = new Schema({
         name: 'gsheet-append',
         label: 'gsheet-append',
-        category: 'Maya Red Gdrive',
+        category: 'Maya Red GSheet',
         color: '#4cde35',
         isConfig: false,
         icon: "drive.png",
@@ -50,7 +50,9 @@ class GsheetAppend extends Node {
         this.setStatus("PROGRESS", "Appending data...");
         var fetch = require("node-fetch"); // or fetch() is native in browsers
         let len = "https://docs.google.com/spreadsheets/d/".length;
-        let spreadsheetId = vals.url.substring(len,vals.url.indexOf('/',len));
+        let index2 = vals.url.indexOf('/',len);
+        index2 = index2 <=0 ? vals.url.length : index2;
+        let spreadsheetId = vals.url.substring(len, index2);
         let  values = [vals.values];
         let fetchConfig = {
             url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURI(vals.range)}:append?insertDataOption=${vals.insertDataOption}&responseDateTimeRenderOption=${vals.responseDateTimeRenderOption}&responseValueRenderOption=${vals.responseValueRenderOption}&valueInputOption=${vals.valueInputOption}`,

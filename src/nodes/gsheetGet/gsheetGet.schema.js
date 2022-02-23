@@ -15,11 +15,13 @@ class GsheetGet extends Node {
     static schema = new Schema({
         name: 'gsheet-get',
         label: 'gsheet-get',
-        category: 'Maya Red Gsheet',
+        category: 'Maya Red GSheet',
+        color: '#4cde35',
         isConfig: false,
+        icon: "drive.png",
         fields: {
             url: new fields.Typed({type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global']}),
-            gridRange: new fields.Typed({type: 'jsonata', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global']}),
+            gridRange: new fields.Typed({type: 'json', defaultVal: 'msg.payload', allowedTypes: ['msg', 'flow', 'global']}),
             includeGridData: new fields.Typed({type: 'bool', defaultVal: true, allowedTypes: ['msg', 'flow', 'global']})
         },
 
