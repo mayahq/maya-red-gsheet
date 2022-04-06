@@ -3,7 +3,7 @@ const {
     Schema,
     fields
 } = require('@mayahq/module-sdk')
-const refresh = require('../../util/refresh');
+const makeRequestWithRefresh = require('../../util/reqWithRefresh')
 
 class GsheetAppend extends Node {
     constructor(node, RED, opts) {
@@ -20,101 +20,53 @@ class GsheetAppend extends Node {
         color: '#4cde35',
         isConfig: false,
         icon: "drive.png",
-        fields: {  
-            url: new fields.Typed({type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global']}),
-            range: new fields.Typed({type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global']}),
-            values: new fields.Typed({type: 'msg', defaultVal: 'payload', allowedTypes: ['msg', 'flow', 'global']}),
-            majorDimension: new fields.Select({ options: ['ROWS', 'COLUMNS'], defaultVal: 'ROWS' }),
-            valueInputOption: new fields.Select({ options: ['RAW', 'USER_ENTERED'], defaultVal: 'USER_ENTERED' }),
-            insertDataOption: new fields.Select({ options: ['OVERWRITE', 'INSERT_ROWS'], defaultVal: 'INSERT_ROWS' }),
+        fields: {
+            url: new fields.Typed({ type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
+            range: new fields.Typed({ type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global'] }),
+            values: new fields.Typed({ type: 'msg', defaultVal: 'payload', allowedTypes: ['msg', 'flow', 'global'] }),
+            majorDimension: new fields.Select({ options: ['ROWS', 'COLUMNS'], defaultVal: 'ROWS', displayName: 'Major dimension' }),
+            valueInputOption: new fields.Select({ options: ['RAW', 'USER_ENTERED'], defaultVal: 'USER_ENTERED', displayName: 'Value input type' }),
+            insertDataOption: new fields.Select({ options: ['OVERWRITE', 'INSERT_ROWS'], defaultVal: 'INSERT_ROWS', displayName: 'Insert type' }),
             responseValueRenderOption: new fields.Select({ options: ['FORMATTED_VALUE', 'UNFORMATTED_VALUE', 'FORMULA'], defaultVal: 'FORMATTED_VALUE' }),
             responseDateTimeRenderOption: new fields.Select({ options: ['FORMATTED_STRING', 'SERIAL_NUMBER'], defaultVal: 'FORMATTED_STRING' }),
         },
 
     })
 
-    async refreshTokens() {
-        const newTokens = await refresh(this)
-        await this.tokens.set(newTokens)
-        return newTokens
-    }
-
     onInit() {
         // Do something on initialization of node
     }
 
     async onMessage(msg, vals) {
-        // Handle the message. The returned value will
-        // be sent as the message to any further nodes.
+        this.setStatus("PROGRESS", "Appending data");
 
-        this.setStatus("PROGRESS", "Appending data...");
-        var fetch = require("node-fetch"); // or fetch() is native in browsers
         let len = "https://docs.google.com/spreadsheets/d/".length;
-        let index2 = vals.url.indexOf('/',len);
-        index2 = index2 <=0 ? vals.url.length : index2;
-        let spreadsheetId = vals.url.substring(len, index2);
-        let  values = [vals.values];
-        let fetchConfig = {
+        let index2 = vals.url.indexOf('/', len);
+        index2 = index2 <= 0 ? vals.url.length : index2;
+        const spreadsheetId = vals.url.substring(len, index2);
+        const values = [vals.values];
+
+        const request = {
             url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURI(vals.range)}:append?insertDataOption=${vals.insertDataOption}&responseDateTimeRenderOption=${vals.responseDateTimeRenderOption}&responseValueRenderOption=${vals.responseValueRenderOption}&valueInputOption=${vals.valueInputOption}`,
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${this.tokens.vals.access_token}`,
-                "Content-Type":"application/json"
+                Authorization: `Bearer ${this.tokens.vals.access_token}`,
             },
-            body: JSON.stringify({
+            data: {
                 range: vals.range,
                 majorDimension: vals.majorDimension,
                 values: values
-            })
-        }
-        try{
-            let res = await fetch(fetchConfig.url, 
-            {
-                method: fetchConfig.method,
-                headers: fetchConfig.headers,
-                body: fetchConfig.body
-            });
-            let json = await res.json();
-            if(json.error){
-                if(json.error.code === 401){
-                    const { access_token } = await this.refreshTokens()
-                    if (!access_token) {
-                        this.setStatus('ERROR', 'Failed to refresh access token')
-                        msg["__isError"] = true;
-                        msg.error = {
-                            reason: 'TOKEN_REFRESH_FAILED',
-                        }
-                        return msg
-                    }
-                    fetchConfig.headers.Authorization = `Bearer ${access_token}`;
-                    res = await fetch(fetchConfig.url, 
-                            {
-                                method: fetchConfig.method,
-                                headers: fetchConfig.headers,
-                                body: fetchConfig.body
-                            });
-                    json = await res.json();
-                    if(json.error){
-                        msg["__isError"] = true;
-                        msg.error = json.error;
-                        this.setStatus("ERROR", json.error.message);
-                        return msg;
-                    }
-                } else {
-                    msg.error = json.error;
-                    msg["__isError"] = true;
-                    this.setStatus("ERROR", json.error.message);
-                    return msg;
-                }
-                
             }
-            msg.payload = json;
-            this.setStatus("SUCCESS", "data added to spreadsheet");
-            return msg;
         }
-        catch(err){
+
+        try {
+            const response = await makeRequestWithRefresh(this, request)
+            msg.payload = response.data
+            this.setStatus("SUCCESS", "Data added to spreadsheet");
+            return msg;
+        } catch (err) {
             msg.error = err;
-            this.setStatus("ERROR", "error occurred");
+            this.setStatus("ERROR", `Error occurred: ${err.message}`);
             return msg;
         }
 
