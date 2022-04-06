@@ -3,6 +3,7 @@ const {
     Schema,
     fields
 } = require('@mayahq/module-sdk')
+const makeRequestWithRefresh = require('../../util/reqWithRefresh')
 
 class GsheetGet extends Node {
     constructor(node, RED, opts) {
@@ -20,9 +21,9 @@ class GsheetGet extends Node {
         isConfig: false,
         icon: "drive.png",
         fields: {
-            url: new fields.Typed({type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global']}),
-            gridRange: new fields.Typed({type: 'json', defaultVal: 'msg.payload', allowedTypes: ['msg', 'flow', 'global']}),
-            includeGridData: new fields.Typed({type: 'bool', defaultVal: true, allowedTypes: ['msg', 'flow', 'global']})
+            url: new fields.Typed({ type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
+            gridRange: new fields.Typed({ type: 'json', defaultVal: 'msg.payload', allowedTypes: ['msg', 'flow', 'global'] }),
+            includeGridData: new fields.Typed({ type: 'bool', defaultVal: true, allowedTypes: ['msg', 'flow', 'global'] })
         },
 
     })
@@ -38,75 +39,34 @@ class GsheetGet extends Node {
     }
 
     async onMessage(msg, vals) {
-        // Handle the message. The returned value will
-        // be sent as the message to any further nodes.
+        this.setStatus("PROGRESS", "Fetching data from spreadsheet");
 
-        this.setStatus("PROGRESS", "fetching data from spreadsheet...");
-        var fetch = require("node-fetch"); // or fetch() is native in browsers
         let len = "https://docs.google.com/spreadsheets/d/".length;
-        let spreadsheetId = vals.url.substring(len,vals.url.indexOf('/',len));
-        let fetchConfig = {
+        let spreadsheetId = vals.url.substring(len, vals.url.indexOf('/', len));
+
+        const request = {
             url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:getByDataFilter`,
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${this.tokens.vals.access_token}`,
-                "Content-Type":"application/json"
+                Authorization: `Bearer ${this.tokens.vals.access_token}`,
             },
-            body: JSON.stringify({
+            data: {
                 dataFilters: [{
                     gridRange: vals.gridRange
                 }],
                 includeGridData: true
-            })
-        }
-        try{
-            let res = await fetch(fetchConfig.url, 
-            {
-                method: fetchConfig.method,
-                headers: fetchConfig.headers,
-                body: fetchConfig.body
-            });
-            let json = await res.json();
-            if(json.error){
-                if(json.error.code === 401){
-                    const { access_token } = await this.refreshTokens()
-                    if (!access_token) {
-                        this.setStatus('ERROR', 'Failed to refresh access token')
-                        msg["__isError"] = true;
-                        msg.error = {
-                            reason: 'TOKEN_REFRESH_FAILED',
-                        }
-                        return msg
-                    }
-                    fetchConfig.headers.Authorization = `Bearer ${access_token}`;
-                    res = await fetch(fetchConfig.url, 
-                            {
-                                method: fetchConfig.method,
-                                headers: fetchConfig.headers,
-                                body: fetchConfig.body
-                            });
-                    json = await res.json();
-                    if(json.error){
-                        msg["__isError"] = true;
-                        msg.error = json.error;
-                        this.setStatus("ERROR", json.error.message);
-                        return msg;
-                    }
-                } else {
-                    msg.error = json.error;
-                    msg["__isError"] = true;
-                    this.setStatus("ERROR", json.error.message);
-                    return msg;
-                }
-                
             }
-            msg.payload = json;
-            this.setStatus("SUCCESS", "fetched");
+        }
+
+        try {
+            const response = await makeRequestWithRefresh(this, request)
+            msg.payload = response.data
+            this.setStatus("SUCCESS", "Fetched");
             return msg;
         }
-        catch(err){
+        catch (err) {
             msg.error = err;
-            this.setStatus("ERROR", "error occurred");
+            this.setStatus("ERROR", `Error occurred: ${err.message}`);
             return msg;
         }
 
