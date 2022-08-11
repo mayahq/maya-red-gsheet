@@ -3,7 +3,8 @@ const {
     Schema,
     fields
 } = require('@mayahq/module-sdk')
-const makeRequestWithRefresh = require('../../util/reqWithRefresh')
+const makeRequestWithRefresh = require('../../util/reqWithRefresh');
+const { validateRowUpdateTypeData, convertRowTypeDataToGsheetsRow } = require('../../util/tableTypeData');
 
 class GsheetAppend extends Node {
     constructor(node, RED, opts) {
@@ -44,7 +45,11 @@ class GsheetAppend extends Node {
         let index2 = vals.url.indexOf('/', len);
         index2 = index2 <= 0 ? vals.url.length : index2;
         const spreadsheetId = vals.url.substring(len, index2);
-        const values = [vals.values];
+        let rows = [vals.values]
+
+        if (validateRowUpdateTypeData(vals.values)) {
+            rows = [convertRowTypeDataToGsheetsRow(vals.values)]
+        }
 
         const request = {
             url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURI(vals.range)}:append?insertDataOption=${vals.insertDataOption}&responseDateTimeRenderOption=${vals.responseDateTimeRenderOption}&responseValueRenderOption=${vals.responseValueRenderOption}&valueInputOption=${vals.valueInputOption}`,
@@ -55,7 +60,7 @@ class GsheetAppend extends Node {
             data: {
                 range: vals.range,
                 majorDimension: vals.majorDimension,
-                values: values
+                values: rows
             }
         }
 
