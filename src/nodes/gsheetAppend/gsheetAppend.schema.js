@@ -45,10 +45,13 @@ class GsheetAppend extends Node {
         let index2 = vals.url.indexOf('/', len);
         index2 = index2 <= 0 ? vals.url.length : index2;
         const spreadsheetId = vals.url.substring(len, index2);
-        let rows = [vals.values]
+        let rows = vals.values
 
-        if (validateRowUpdateTypeData(vals.values)) {
-            rows = [convertRowTypeDataToGsheetsRow(vals.values)]
+        // let rows = [vals.values]
+
+        if (rows.every(row => validateRowUpdateTypeData(row))) {
+            rows = rows.map(row => convertRowTypeDataToGsheetsRow(row))
+            // rows = [convertRowTypeDataToGsheetsRow(vals.values)]
         }
 
         const request = {
