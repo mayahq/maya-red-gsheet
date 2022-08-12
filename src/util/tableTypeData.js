@@ -62,9 +62,122 @@ function convertRowTypeDataToGsheetsRow(rowTypeData) {
     return vals
 }
 
+/**
+ * 
+ * @param {import('./types').GsheetCell} cell 
+ */
+function getCellTypeDataFromGsheetCell(cell) {
+    const val = cell.effectiveValue
+    if (!isNullOrUndefined(val.boolValue)) {
+        return {
+            type: 'boolean',
+            value: val.boolValue
+        }
+    } else if (!isNullOrUndefined(val.errorValue)) {
+        return {
+            type: 'error',
+            value: val.errorValue.message
+        }
+    } else if (!isNullOrUndefined(val.formulaValue)) {
+        return {
+            type: 'string',
+            value: val.formulaValue
+        }
+    } else if (!isNullOrUndefined(val.numberValue)) {
+        return {
+            type: 'number',
+            value: val.numberValue
+        }
+    } else if (!isNullOrUndefined(val.stringValue)) {
+        return {
+            type: 'string',
+            value: val.stringValue
+        }
+    } else {
+        const vals = Object.values(val)
+        try {
+            if (vals.length === 0) {
+                return {
+                    type: 'string',
+                    value: ''
+                }
+            }
+            return {
+                type: 'string',
+                value: vals[0].toString()
+            }
+        } catch (e) {
+            return {
+                type: 'string',
+                value: 'parse_error'
+            }
+        }
+    }
+}
+
+/**
+ * 
+ * @param {import('./types').gsheetRow} row 
+ */
+function convertGsheetsRowToRowTypeData(idx, colNames, row) {
+    const cells = row.values
+    const res = {
+        _identifier: {
+            value: idx.toString(),
+            type: 'rowIndex'
+        },
+        fields: {}
+    }
+
+    colNames.forEach((colName, idx) => {
+        if (idx >= cells.length || !colName) {
+            return
+        }
+        const colValue = cells[idx]
+        res.fields[colName] = getCellTypeDataFromGsheetCell(colValue)
+    })
+    return res
+}
+
+function getDefautValueForType(type) {
+    switch (type) {
+        case 'boolean': return false
+        case 'string': return ''
+        case 'number': return 0
+        case 'formula': return ''
+        case 'error': return ''
+    }
+}
+
+function getTableTypeDataFromSheet(sheet) {
+    const gridData = sheet.data[0]
+    /**
+     * @type {import('./types').GsheetRow[]}
+     */
+    const rowData = gridData.rowData
+    if (rowData.length <= 1) {
+        return []
+    } 
+    const firstRow = rowData[0]
+    const numColumns = firstRow.values.length
+    const colNames = []
+    for (let i = 0; i < numColumns; i++) {
+        colNames.push(firstRow.values[i].formattedValue) || ''
+    }
+
+    const res = []
+    for (let i = 1; i < rowData.length; i++) {
+        res.push(convertGsheetsRowToRowTypeData(i, colNames, rowData[i]))
+    }
+
+    return res
+}
+
 module.exports = {
     validateTableTypeData,
     validateRowUpdateTypeData,
     validateTableUpdateTypeData,
     convertRowTypeDataToGsheetsRow,
+    convertGsheetsRowToRowTypeData,
+    getTableTypeDataFromSheet
 }

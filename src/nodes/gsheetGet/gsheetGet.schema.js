@@ -4,6 +4,7 @@ const {
     fields
 } = require('@mayahq/module-sdk')
 const makeRequestWithRefresh = require('../../util/reqWithRefresh')
+const { getTableTypeDataFromSheet } = require('../../util/tableTypeData')
 
 class GsheetGet extends Node {
     constructor(node, RED, opts) {
@@ -60,6 +61,12 @@ class GsheetGet extends Node {
 
         try {
             const response = await makeRequestWithRefresh(this, request)
+            try {
+                const gsheetData = response.data.sheets[0]
+                msg.table = getTableTypeDataFromSheet(gsheetData)
+            } catch (e) {
+                console.log('There was an error formatting gsheet data', e)
+            }
             msg.payload = response.data
             this.setStatus("SUCCESS", "Fetched");
             return msg;

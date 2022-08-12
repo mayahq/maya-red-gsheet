@@ -24,6 +24,24 @@ export type RowUpdateType = {
     fields: RowTypeData
 }
 
+export type GsheetCell = {
+    effectiveValue: {
+        stringValue?: string;
+        boolValue?: boolean;
+        numberValue?: number;
+        formulaValue?: string;
+        errorValue?: {
+            type: string;
+            message: string;
+        }
+    }
+    formattedValue: string;
+}
+
+export type GsheetRow = {
+    values: GsheetCell[];
+}
+
 /**
  * Standard to specify multiple row updates at once
  */
