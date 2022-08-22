@@ -68,6 +68,12 @@ function convertRowTypeDataToGsheetsRow(rowTypeData) {
  */
 function getCellTypeDataFromGsheetCell(cell) {
     const val = cell.effectiveValue
+    if (!val) {
+        return {
+            type: 'string',
+            value: ''
+        }
+    }
     if (!isNullOrUndefined(val.boolValue)) {
         return {
             type: 'boolean',
