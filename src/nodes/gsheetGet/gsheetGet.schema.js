@@ -48,7 +48,7 @@ class GsheetGet extends Node {
         if(vals.url) {
             worksheetUrl = new URL(vals.url)
             if(!Object.keys(vals.gridRange).includes('sheetId')) {
-                vals.gridRange['sheetId'] = worksheetUrl.searchParams.get('gid');
+                vals.gridRange['sheetId'] = worksheetUrl.searchParams.hash.substring(5);
             }
         }
         const request = {
