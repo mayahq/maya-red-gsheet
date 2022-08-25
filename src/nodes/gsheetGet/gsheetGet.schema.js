@@ -44,6 +44,10 @@ class GsheetGet extends Node {
 
         let len = "https://docs.google.com/spreadsheets/d/".length;
         let spreadsheetId = vals.url.substring(len, vals.url.indexOf('/', len));
+        let worksheetUrl = new URL(vals.url || "https://example.com?gid=0")
+        if(worksheetUrl.searchParams.get('gid') && !Object.entries(vals.gridRange).includes('sheetId')){
+            vals.gridRange['sheetId'] = worksheetUrl.searchParams.get('gid');
+        }
 
         const request = {
             url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:getByDataFilter`,
