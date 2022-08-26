@@ -157,11 +157,14 @@ function getDefautValueForType(type) {
 
 function getTableTypeDataFromSheet(sheet) {
     const gridData = sheet.data[0]
+    if (!gridData) {
+        return []
+    }
     /**
      * @type {import('./types').GsheetRow[]}
      */
     const rowData = gridData.rowData
-    if (rowData.length <= 1) {
+    if (!rowData || rowData.length <= 1) {
         return []
     } 
     const firstRow = rowData[0]
