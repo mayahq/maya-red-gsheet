@@ -4,7 +4,13 @@ const {
     fields
 } = require('@mayahq/module-sdk')
 const makeRequestWithRefresh = require('../../util/reqWithRefresh');
-const { validateRowUpdateTypeData, convertRowTypeDataToGsheetsRow } = require('../../util/tableTypeData');
+const { 
+    validateRowUpdateTypeData, 
+    convertRowTypeDataToGsheetsRow, 
+    getTableTypeDataFromSheet ,
+    generateOrderedGsheetDataArray,
+    getColumnOrder
+} = require('../../util/tableTypeData');
 
 class GsheetAppend extends Node {
     constructor(node, RED, opts) {
@@ -45,13 +51,29 @@ class GsheetAppend extends Node {
         let index2 = vals.url.indexOf('/', len);
         index2 = index2 <= 0 ? vals.url.length : index2;
         const spreadsheetId = vals.url.substring(len, index2);
-        let rows = vals.values
 
-        // let rows = [vals.values]
+        let gridRangeSheetId = 'Sheet1'
+        if(vals.url) {
+            let worksheetUrl = new URL(vals.url)
+            gridRangeSheetId = worksheetUrl.hash.substring(5) || 'Sheet1'
+        }
 
-        if (rows.every(row => validateRowUpdateTypeData(row))) {
-            rows = rows.map(row => convertRowTypeDataToGsheetsRow(row))
-            // rows = [convertRowTypeDataToGsheetsRow(vals.values)]
+        const requestToGetFirstRow = {
+            url: `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:getByDataFilter`,
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${this.tokens.vals.access_token}`,
+            },
+            data: {
+                dataFilters: [{
+                    gridRange: {
+                        sheetId: gridRangeSheetId,
+                        // startRowIndex: 1,
+                        // endRowIndex: 2
+                    }
+                }],
+                includeGridData: true
+            }
         }
 
         const request = {
@@ -63,16 +85,34 @@ class GsheetAppend extends Node {
             data: {
                 range: vals.range,
                 majorDimension: vals.majorDimension,
-                values: rows
             }
         }
 
         try {
+            try {
+                const res = await makeRequestWithRefresh(this, requestToGetFirstRow)
+                console.log('yee', res.data)
+    
+                const columnOrder = getColumnOrder(res.data.sheets[0])
+    
+                console.log('values', vals.values)
+                const orderedRowData = generateOrderedGsheetDataArray(columnOrder, vals.values)
+                request.data.values = orderedRowData
+            } catch (e) {
+                const rows = vals.values
+                if (!Array.isArray(rows)) {
+                    rows = [rows]
+                }
+                const data = rows.map(row => convertRowTypeDataToGsheetsRow(row))
+                request.data.values = data
+            }
+            
             const response = await makeRequestWithRefresh(this, request)
             msg.payload = response.data
             this.setStatus("SUCCESS", "Data added to spreadsheet");
             return msg;
         } catch (err) {
+            console.log(err?.response?.data)
             msg.error = err;
             this.setStatus("ERROR", `Error occurred: ${err.message}`);
             return msg;

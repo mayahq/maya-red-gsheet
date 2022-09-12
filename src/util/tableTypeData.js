@@ -182,11 +182,59 @@ function getTableTypeDataFromSheet(sheet) {
     return res
 }
 
+function getColumnOrder(sheet) {
+    console.log('sheetData', sheet)
+    const gridData = sheet.data[0]
+    if (!gridData) {
+        return []
+    }
+
+    const rowData = gridData.rowData
+    const firstRow = rowData[0]
+    const colNames = []
+    const numColumns = firstRow.values.length
+    for (let i = 0; i < numColumns; i++) {
+        colNames.push(firstRow.values[i].formattedValue) || ''
+    }
+    return colNames
+}
+
+function generateOrderedGsheetDataArray(order, rowData) {
+    const gsheetRowData = []
+
+    console.log('rowData', rowData)
+    rowData.forEach(row => {
+        const orderedFields = {}
+        order.forEach(field => {
+            if (row.fields[field]) {
+                orderedFields[field] = row.fields[field]
+            } else {
+                orderedFields[field] = {
+                    type: 'string',
+                    value: ''
+                }
+            }
+        })
+    
+        gsheetRowData.push(convertRowTypeDataToGsheetsRow({
+            _identifier: {
+                type: 'randomNumber',
+                value: Math.floor(10000 * Math.random())
+            },
+            fields: orderedFields
+        }))
+    })
+
+    return gsheetRowData
+}
+
 module.exports = {
     validateTableTypeData,
     validateRowUpdateTypeData,
     validateTableUpdateTypeData,
     convertRowTypeDataToGsheetsRow,
     convertGsheetsRowToRowTypeData,
-    getTableTypeDataFromSheet
+    getTableTypeDataFromSheet,
+    generateOrderedGsheetDataArray,
+    getColumnOrder
 }
