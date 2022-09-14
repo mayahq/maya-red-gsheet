@@ -22,7 +22,7 @@ class GsheetGet extends Node {
         isConfig: false,
         icon: "drive.png",
         fields: {
-            url: new fields.Typed({ type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
+            url: new fields.Typed({ required: true, type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
             gridRange: new fields.Typed({ type: 'json', defaultVal: 'msg.payload', allowedTypes: ['msg', 'flow', 'global'] }),
             includeGridData: new fields.Typed({ type: 'bool', defaultVal: true, allowedTypes: ['msg', 'flow', 'global'] })
         },
