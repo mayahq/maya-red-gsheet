@@ -1,0 +1,96 @@
+<script type='text/javascript'>
+    RED.nodes.registerType("gsheet-url", {
+        category: "config",
+        color: "#8BBDD9",
+        defaults: {
+            name: {
+                value: ""
+            },
+            isProfileConfigNode: {
+                value: false
+            },
+            url: {
+                value: "",
+                required: true
+            },
+            payloadTypeurl: {
+                value: "str"
+            },
+        },
+        credentials: {},
+        inputs: 1,
+        outputs: 1,
+        icon: "fa-file-code-o.png",
+        label: function() {
+            return this.name || "gsheet-url"
+        },
+        paletteLabel: "gsheet-url",
+        exportable: true,
+        oneditprepare: function() {
+            if (this.payloadTypeurl === null) {
+                if (this.url === "") {
+                    this.payloadTypeurl = "date"
+                } else {
+                    this.payloadTypeurl = "str"
+                }
+            } else if (this.payloadTypeurl === 'string' || this.payloadTypeurl === 'none') {
+                this.payloadTypeurl = "str"
+            }
+
+            $("#node-config-input-payloadTypeurl").val(this.payloadTypeurl)
+            $("#node-config-input-url").typedInput({
+                default: "str",
+                typeField: $("#node-config-input-payloadTypeurl"),
+                types: ["msg", "flow", "global", "str"]
+            })
+            $("#node-config-input-url").typedInput("type", this.payloadTypeurl)
+
+        },
+        oneditsave: function() {},
+        oneditcancel: function() {},
+        oneditdelete: function() {},
+        oneditresize: function() {},
+        onpaletteadd: function() {},
+        onpaletteremove: function() {}
+    });
+</script>
+
+<script type="text/html" data-template-name="gsheet-url">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" style="width:70%;" placeholder="Name" />
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-url">url</label>
+        <input type="text" id="node-config-input-url"></input>
+        <input type="hidden" id="node-config-input-payloadTypeurl">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="gsheet-url">
+    <h2>Description</h2>
+    <p>Query opens tabs based on criteria like URL, muted status</p>
+
+    <h2>Config</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+
+
+    <h2>Outputs</h2>
+    <dl class="message-properties">
+
+        <dt>payload<span class="property-type">various</span></dt>
+        <dd>The configured payload of the message.</dd>
+
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd>An optional property</dd>
+
+    </dl>
+</script>

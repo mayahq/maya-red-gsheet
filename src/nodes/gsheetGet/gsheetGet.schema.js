@@ -5,7 +5,7 @@ const {
 } = require('@mayahq/module-sdk')
 const makeRequestWithRefresh = require('../../util/reqWithRefresh')
 const { getTableTypeDataFromSheet } = require('../../util/tableTypeData')
-
+const GsheetUrl = require('../gsheetUrl/gsheetUrl.schema.js')
 class GsheetGet extends Node {
     constructor(node, RED, opts) {
         super(node, RED, {
@@ -22,7 +22,7 @@ class GsheetGet extends Node {
         isConfig: false,
         icon: "drive.png",
         fields: {
-            url: new fields.Typed({ required: true, type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
+            GsheetUrl: new fields.ConfigNode({ type: GsheetUrl }),
             gridRange: new fields.Typed({ type: 'json', defaultVal: 'msg.payload', allowedTypes: ['msg', 'flow', 'global'] }),
             includeGridData: new fields.Typed({ type: 'bool', defaultVal: true, allowedTypes: ['msg', 'flow', 'global'] })
         },
@@ -41,7 +41,7 @@ class GsheetGet extends Node {
 
     async onMessage(msg, vals) {
         this.setStatus("PROGRESS", "Fetching data from spreadsheet");
-
+        vals.url = vals.GsheetUrl.url;
         let len = "https://docs.google.com/spreadsheets/d/".length;
         let spreadsheetId = vals.url.substring(len, vals.url.indexOf('/', len));
         let worksheetUrl;

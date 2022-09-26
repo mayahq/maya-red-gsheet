@@ -23,7 +23,8 @@
   "node-red": {
     "nodes": {
       "gsheet-append": "src/nodes/gsheetAppend/gsheetAppend.node.js",
-      "gsheet-get": "src/nodes/gsheetGet/gsheetGet.node.js"
+      "gsheet-get": "src/nodes/gsheetGet/gsheetGet.node.js",
+      "gsheet-url": "src/nodes/gsheetUrl/gsheetUrl.node.js"
     }
   },
   "mayaDetails": {

@@ -9,12 +9,9 @@
             isProfileConfigNode: {
                 value: false
             },
-            url: {
+            GsheetUrl: {
                 value: "",
-                required: true
-            },
-            payloadTypeurl: {
-                value: "str"
+                type: "gsheet-url"
             },
             gridRange: {
                 value: "msg.payload",
@@ -40,24 +37,6 @@
         paletteLabel: "gsheet-get",
         exportable: true,
         oneditprepare: function() {
-            if (this.payloadTypeurl === null) {
-                if (this.url === "") {
-                    this.payloadTypeurl = "date"
-                } else {
-                    this.payloadTypeurl = "str"
-                }
-            } else if (this.payloadTypeurl === 'string' || this.payloadTypeurl === 'none') {
-                this.payloadTypeurl = "str"
-            }
-
-            $("#node-input-payloadTypeurl").val(this.payloadTypeurl)
-            $("#node-input-url").typedInput({
-                default: "str",
-                typeField: $("#node-input-payloadTypeurl"),
-                types: ["msg", "flow", "global", "str"]
-            })
-            $("#node-input-url").typedInput("type", this.payloadTypeurl)
-
             if (this.payloadTypegridRange === null) {
                 if (this.gridRange === "") {
                     this.payloadTypegridRange = "date"
@@ -110,9 +89,8 @@
         <input type="text" id="node-input-name" style="width:70%;" placeholder="Name" />
     </div>
     <div class="form-row">
-        <label for="node-input-url">url</label>
-        <input type="text" id="node-input-url"></input>
-        <input type="hidden" id="node-input-payloadTypeurl">
+        <label for="node-input-GsheetUrl">GsheetUrl</label>
+        <input type="text" id="node-input-GsheetUrl"></input>
     </div>
     <div class="form-row">
         <label for="node-input-gridRange">gridRange</label>

@@ -11,6 +11,7 @@ const {
     generateOrderedGsheetDataArray,
     getColumnOrder
 } = require('../../util/tableTypeData');
+const GsheetUrl = require('../gsheetUrl/gsheetUrl.schema.js')
 
 class GsheetAppend extends Node {
     constructor(node, RED, opts) {
@@ -28,7 +29,7 @@ class GsheetAppend extends Node {
         isConfig: false,
         icon: "drive.png",
         fields: {
-            url: new fields.Typed({ required: true, type: 'str', defaultVal: '', allowedTypes: ['msg', 'flow', 'global'] }),
+            GsheetUrl: new fields.ConfigNode({ type: GsheetUrl }),
             range: new fields.Typed({ type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global'] }),
             values: new fields.Typed({ type: 'msg', defaultVal: 'payload', allowedTypes: ['msg', 'flow', 'global'] }),
             majorDimension: new fields.Select({ options: ['ROWS', 'COLUMNS'], defaultVal: 'ROWS', displayName: 'Major dimension' }),
@@ -46,6 +47,7 @@ class GsheetAppend extends Node {
 
     async onMessage(msg, vals) {
         this.setStatus("PROGRESS", "Appending data");
+        vals.url = vals.GsheetUrl.url;
 
         let len = "https://docs.google.com/spreadsheets/d/".length;
         let index2 = vals.url.indexOf('/', len);
