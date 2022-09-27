@@ -30,8 +30,8 @@ class GsheetAppend extends Node {
         icon: "drive.png",
         fields: {
             GsheetUrl: new fields.ConfigNode({ type: GsheetUrl }),
-            range: new fields.Typed({ type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global'] }),
-            values: new fields.Typed({ type: 'msg', defaultVal: 'payload', allowedTypes: ['msg', 'flow', 'global'] }),
+            range: new fields.Typed({ type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global'], displayName: 'Sheet name' }),
+            values: new fields.Typed({ type: 'msg', defaultVal: 'rowData', allowedTypes: ['msg', 'flow', 'global'] }),
             majorDimension: new fields.Select({ options: ['ROWS', 'COLUMNS'], defaultVal: 'ROWS', displayName: 'Major dimension' }),
             valueInputOption: new fields.Select({ options: ['RAW', 'USER_ENTERED'], defaultVal: 'USER_ENTERED', displayName: 'Value input type' }),
             insertDataOption: new fields.Select({ options: ['OVERWRITE', 'INSERT_ROWS'], defaultVal: 'INSERT_ROWS', displayName: 'Insert type' }),
@@ -101,11 +101,14 @@ class GsheetAppend extends Node {
                 const orderedRowData = generateOrderedGsheetDataArray(columnOrder, vals.values)
                 request.data.values = orderedRowData
             } catch (e) {
-                const rows = vals.values
+                console.log('the error', e)
+                let rows = vals.values
                 if (!Array.isArray(rows)) {
                     rows = [rows]
                 }
+                console.log('the rows', rows)
                 const data = rows.map(row => convertRowTypeDataToGsheetsRow(row))
+                console.log('the data', data)
                 request.data.values = data
             }
             
@@ -115,6 +118,7 @@ class GsheetAppend extends Node {
             return msg;
         } catch (err) {
             console.log(err?.response?.data)
+            console.log(err)
             msg.error = err;
             this.setStatus("ERROR", `Error occurred: ${err.message}`);
             return msg;
