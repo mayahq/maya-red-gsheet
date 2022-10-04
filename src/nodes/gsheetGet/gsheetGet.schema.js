@@ -69,7 +69,9 @@ class GsheetGet extends Node {
             const response = await makeRequestWithRefresh(this, request)
             try {
                 const gsheetData = response.data.sheets[0]
-                msg.table = getTableTypeDataFromSheet(gsheetData)
+                const tableData = getTableTypeDataFromSheet(gsheetData)
+                msg.table = tableData
+                msg.rowData = tableData
             } catch (e) {
                 console.log('There was an error formatting gsheet data', e)
             }
