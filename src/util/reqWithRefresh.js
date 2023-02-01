@@ -8,6 +8,7 @@ async function makeRequestWithRefresh(node, request, { force = false } = {}) {
         // e.response = { status: 401 }
         // throw e
 
+        console.log('making request', request)
         const response = await axios(request)
         return response
     } catch (e) {
