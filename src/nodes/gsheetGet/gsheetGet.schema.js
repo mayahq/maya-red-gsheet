@@ -40,6 +40,7 @@ class GsheetGet extends Node {
     }
 
     async onMessage(msg, vals) {
+        console.log('the vals', vals)
         this.setStatus("PROGRESS", "Fetching data from spreadsheet");
         vals.url = vals.GsheetUrl.url;
         let len = "https://docs.google.com/spreadsheets/d/".length;
