@@ -11,6 +11,8 @@ async function makeRequestWithRefresh(node, request, { force = false } = {}) {
         const response = await axios(request)
         return response
     } catch (e) {
+        console.log('Error making request, might have to refresh tokens')
+        console.log(e?.response?.status, e?.response?.data)
         if (e.response && parseInt(e.response.status) === 401) {
             const start = Date.now()
             const { tokens, fromCache } = await refresh(node, { force })

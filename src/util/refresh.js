@@ -30,6 +30,7 @@ async function refresh(node, { force = false } = {}) {
         // At this point, we know the tokens in cache are useless. We must hit the cloud API and see if
         // we can get fresh tokens from there.
 
+        console.log('Acquiring remote token lock')
         const toks = await tokenControl.lockTokens(async (tokenData) => {
             console.log('Acquired remote token lock')
             const { tokens, lastUpdated } = tokenData
