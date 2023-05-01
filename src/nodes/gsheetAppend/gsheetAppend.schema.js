@@ -29,7 +29,7 @@ class GsheetAppend extends Node {
         isConfig: false,
         icon: "drive.png",
         fields: {
-            GsheetUrl: new fields.ConfigNode({ type: GsheetUrl }),
+            GsheetUrl: new fields.ConfigNode({ type: GsheetUrl, useAlias: true }),
             range: new fields.Typed({ type: 'str', defaultVal: 'Sheet1', allowedTypes: ['msg', 'flow', 'global'], displayName: 'Sheet name' }),
             values: new fields.Typed({ type: 'msg', defaultVal: 'rowData', allowedTypes: ['msg', 'flow', 'global'] }),
             majorDimension: new fields.Select({ options: ['ROWS', 'COLUMNS'], defaultVal: 'ROWS', displayName: 'Major dimension' }),
